@@ -27,16 +27,27 @@ app.get("/api/employees", async (req, res) => {
     }
 });
 
+
 app.post("/api/employees", async (req, res) => {
     try {
-        const employee = new Employee(req.body);
-        const savedEmployee = await employee.save();
+        const employee = new Employee({
+            name: req.body.name,
+            email: req.body.email,
+            phone: req.body.phone,
+            department: req.body.department,
+            role: req.body.role,
+            salary: req.body.salary,
+            attendance: req.body.attendance,
+            leaveStatus: req.body.leaveStatus ?? req.body.leave ?? "No Leave"
+        });
 
+        const savedEmployee = await employee.save();
         res.status(201).json(savedEmployee);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 });
+
 
 app.put("/api/employees/:id", async (req, res) => {
     try {

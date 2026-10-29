@@ -1,10 +1,77 @@
+
 import React, { useEffect, useState } from "react";
 import "./App.css";
 
-function App() {
-    const [employees, setEmployees] = useState([]);
+const API = "http://localhost:5000/api/employees";
 
-    const [form, setForm] = useState({
+function App() {
+  const [employees, setEmployees] = useState([]);
+  const [message, setMessage] = useState("");
+
+  const [form, setForm] = useState({
+  name: "",
+  email: "",
+  phone: "",
+  department: "",
+  role: "",
+  salary: "",
+  attendance: "",
+  leave: ""
+  });
+
+  async function loadEmployees() {
+    try {
+      const response = await fetch(API);
+      if (!response.ok) throw new Error("Unable to load employees");
+
+      const data = await response.json();
+      setEmployees(data);
+    } catch (error) {
+      setMessage("Backend connection failed. Check that the backend is running.");
+    }
+  }
+
+  useEffect(() => {
+    loadEmployees();
+  }, []);
+
+  function handleChange(event) {
+    setForm({
+      ...form,
+      [event.target.name]: event.target.value
+    });
+  }
+
+  async function addEmployee(event) {
+    event.preventDefault();
+    setMessage("");
+
+    try {
+      const response = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        
+
+
+body: JSON.stringify({
+    ...form,
+    salary: Number(form.salary),
+    attendance: Number(form.attendance),
+    leaveStatus: form.leave
+})
+
+
+
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to add employee");
+      }
+
+      setMessage("Employee added successfully!");
+      setForm({
         name: "",
         email: "",
         phone: "",
@@ -12,272 +79,121 @@ function App() {
         role: "",
         salary: "",
         attendance: "",
-        leaveStatus: "No Leave"
-    });
+        leave: ""
+      });
 
-    const [editId, setEditId] = useState(null);
+      await loadEmployees();
+    } catch (error) {
+      setMessage("Error: " + error.message);
+    }
+  }
 
-    const getEmployees = async () => {
-        try {
-            const response = await fetch(
-                "http://localhost:5000/api/employees"
-            );
+  return (
+    <div className="container">
+      <h1>Employee Management System</h1>
+      <p className="subtitle">Manage your employees in one place</p>
 
-            const data = await response.json();
-            setEmployees(data);
-        } catch (error) {
-            console.log("Backend connection error:", error);
-        }
-    };
+      {message && <p className="message">{message}</p>}
 
-    useEffect(() => {
-        getEmployees();
-    }, []);
+      <section className="panel">
+        <h2>Add Employee</h2>
 
-    const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value
-        });
-    };
+        <form className="employee-form" onSubmit={addEmployee}>
+          <input name="name" placeholder="Name" value={form.name} onChange={handleChange} required />
+          <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required />
+          <input name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} />
+          <input name="department" placeholder="Department" value={form.department} onChange={handleChange} required />
+          <input name="role" placeholder="Role" value={form.role} onChange={handleChange} required />
+          <input name="salary" type="number" placeholder="Salary" value={form.salary} onChange={handleChange} required />
+          <input name="attendance" type="number" min="0" max="100" placeholder="Attendance (%)" value={form.attendance} onChange={handleChange} required />
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+          
 
-        try {
-            const url = editId
-                ? `http://localhost:5000/api/employees/${editId}`
-                : "http://localhost:5000/api/employees";
+<select
+  name="leave"
+  value={form.leave}
+  onChange={handleChange}
+  required
+>
+  <option value="">Select Leave Status</option>
+  <option value="No Leave">No Leave</option>
+  <option value="Leave Applied">Leave Applied</option>
+  <option value="Leave Approved">Leave Approved</option>
+</select>
 
-            const method = editId ? "PUT" : "POST";
 
-            await fetch(url, {
-                method: method,
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(form)
-            });
+          <button type="submit">Add Employee</button>
+        </form>
+      </section>
 
-            alert(
-                editId
-                    ? "Employee updated successfully!"
-                    : "Employee added successfully!"
-            );
+      <section className="panel">
+        <h2>Employee List ({employees.length})</h2>
 
-            setForm({
-                name: "",
-                email: "",
-                phone: "",
-                department: "",
-                role: "",
-                salary: "",
-                attendance: "",
-                leaveStatus: "No Leave"
-            });
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Department</th>
+                <th>Role</th>
+                <th>Salary</th>
+                <th>Attendance</th>
+                <th>Leave</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees.map((employee) => (
+    <tr key={employee._id}>
+      <td>{employee.name}</td>
+      <td>{employee.email}</td>
+      <td>{employee.phone}</td>
+      <td>{employee.department}</td>
+      <td>{employee.role}</td>
+      <td>{employee.salary}</td>
+      <td>{employee.attendance ?? "-"}</td>
+      <td>{employee.leaveStatus ?? employee.leave ?? "-"}</td>
 
-            setEditId(null);
-            getEmployees();
-
-        } catch (error) {
-            alert("Error connecting to backend");
-            console.log(error);
-        }
-    };
-
-    const editEmployee = (employee) => {
-        setForm({
-            name: employee.name,
-            email: employee.email,
-            phone: employee.phone,
-            department: employee.department,
-            role: employee.role,
-            salary: employee.salary,
-            attendance: employee.attendance,
-            leaveStatus: employee.leaveStatus
-        });
-
-        setEditId(employee._id);
-    };
-
-    const deleteEmployee = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this employee?")) {
-            return;
-        }
-
-        await fetch(
-            `http://localhost:5000/api/employees/${id}`,
-            {
-                method: "DELETE"
+      <td>
+        <button
+          type="button"
+          className="delete-button"
+          onClick={async () => {
+            if (!window.confirm("Are you sure you want to delete this employee?")) {
+              return;
             }
-        );
 
-        getEmployees();
-    };
+            try {
+              const response = await fetch(
+                `http://localhost:5000/api/employees/${employee._id}`,
+                { method: "DELETE" }
+              );
 
-    return (
-        <div className="container">
+              if (!response.ok) {
+                throw new Error("Delete failed");
+              }
 
-            <h1>Employee Management System</h1>
+              setMessage("Employee deleted successfully!");
+              await loadEmployees();
+            } catch (error) {
+              setMessage("Unable to delete employee. Check your backend DELETE route.");
+            }
+          }}
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  ))}
 
-            <div className="form-container">
-
-                <h2>
-                    {editId ? "Update Employee" : "Add Employee"}
-                </h2>
-
-                <form onSubmit={handleSubmit}>
-
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Employee Name"
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                    />
-
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        value={form.email}
-                        onChange={handleChange}
-                        required
-                    />
-
-                    <input
-                        type="text"
-                        name="phone"
-                        placeholder="Phone Number"
-                        value={form.phone}
-                        onChange={handleChange}
-                        required
-                    />
-
-                    <select
-                        name="department"
-                        value={form.department}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="">Select Department</option>
-                        <option value="IT">IT</option>
-                        <option value="HR">HR</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Sales">Sales</option>
-                    </select>
-
-                    <input
-                        type="text"
-                        name="role"
-                        placeholder="Job Role"
-                        value={form.role}
-                        onChange={handleChange}
-                        required
-                    />
-
-                    <input
-                        type="number"
-                        name="salary"
-                        placeholder="Salary"
-                        value={form.salary}
-                        onChange={handleChange}
-                        required
-                    />
-
-                    <input
-                        type="number"
-                        name="attendance"
-                        placeholder="Attendance %"
-                        value={form.attendance}
-                        onChange={handleChange}
-                    />
-
-                    <select
-                        name="leaveStatus"
-                        value={form.leaveStatus}
-                        onChange={handleChange}
-                    >
-                        <option value="No Leave">No Leave</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                    </select>
-
-                    <button type="submit">
-                        {editId ? "Update Employee" : "Add Employee"}
-                    </button>
-
-                </form>
-            </div>
-
-            <div className="table-container">
-
-                <h2>Employee Details</h2>
-
-                <table>
-
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Department</th>
-                            <th>Role</th>
-                            <th>Salary</th>
-                            <th>Attendance</th>
-                            <th>Leave</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {employees.map((employee) => (
-                            <tr key={employee._id}>
-
-                                <td>{employee.name}</td>
-                                <td>{employee.email}</td>
-                                <td>{employee.phone}</td>
-                                <td>{employee.department}</td>
-                                <td>{employee.role}</td>
-                                <td>₹{employee.salary}</td>
-                                <td>{employee.attendance}%</td>
-                                <td>{employee.leaveStatus}</td>
-
-                                <td>
-                                    <button
-                                        className="edit"
-                                        onClick={() =>
-                                            editEmployee(employee)
-                                        }
-                                    >
-                                        Edit
-                                    </button>
-
-                                    <button
-                                        className="delete"
-                                        onClick={() =>
-                                            deleteEmployee(employee._id)
-                                        }
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-
-                            </tr>
-                        ))}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
+            </tbody>
+          </table>
         </div>
-    );
+      </section>
+    </div>
+  );
 }
 
 export default App;

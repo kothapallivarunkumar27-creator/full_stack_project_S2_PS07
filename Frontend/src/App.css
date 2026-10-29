@@ -1,117 +1,92 @@
-* {
-    box-sizing: border-box;
-}
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f2f4f7;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  color: #243047;
 }
 
 .container {
-    width: 95%;
-    margin: auto;
-    padding: 30px;
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 20px;
 }
 
 h1 {
-    text-align: center;
-    color: #1f2937;
-    margin-bottom: 30px;
+  text-align: center;
+  color: #173b72;
 }
 
-h2 {
-    color: #333;
+.subtitle {
+  text-align: center;
+  color: #68758a;
 }
 
-.form-container {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.panel {
+  background: white;
+  padding: 24px;
+  margin: 24px 0;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px #00000012;
 }
 
-form {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
+.employee-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
 }
 
-input,
-select {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 15px;
+input, select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: white;
 }
 
-form button {
-    padding: 12px;
-    background: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+button {
+  padding: 12px;
+  background: #2463b5;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-form button:hover {
-    background: #1d4ed8;
+.message {
+  padding: 12px;
+  background: #dbeafe;
+  border-radius: 5px;
 }
 
-.table-container {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    overflow-x: auto;
+.table-wrapper {
+  overflow-x: auto;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 th {
-    background: #2563eb;
-    color: white;
-    padding: 12px;
+  background: #eaf1fb;
+}
+.delete-button {
+  background-color: #dc2626;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
-}
-
-tr:hover {
-    background: #f5f5f5;
-}
-
-.edit {
-    background: #16a34a;
-    color: white;
-    border: none;
-    padding: 7px 12px;
-    margin-right: 5px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.delete {
-    background: #dc2626;
-    color: white;
-    border: none;
-    padding: 7px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-@media (max-width: 800px) {
-    form {
-        grid-template-columns: 1fr;
-    }
-
-    table {
-        font-size: 12px;
-    }
+.delete-button:hover {
+  background-color: #991b1b;
 }
